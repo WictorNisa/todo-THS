@@ -3,13 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
     <title>Todo App</title>
 
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/main.css" />
   </head>
   <body>
     <main>
-      <h1>Welcome to My Project</h1>
+      <section class="todo-container">
+        <div class="todo-header">
+          <h1>Todo</h1>
+        </div>
+        <div class="todo-input-container">
+          <form  class="todo-form">
+            <input
+              type="text"
+              class="todo-input"
+              placeholder="Enter a todo"
+              
+            />
+            <button type="submit">Add Todo</button>
+            <p class="todo-alert"></p>
+          </form>
+        </div>
+
+        <ul class="todo-list"></ul>
+      </section>
     </main>
 
     <script src="js/index.js"></script>

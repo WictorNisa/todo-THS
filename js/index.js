@@ -48,42 +48,14 @@ const renderTodos = () => {
     const li = document.createElement("li");
     li.classList.add("todo-item");
 
-    // Create check button
-    const checkButton = document.createElement("button");
-    checkButton.classList.add("check-button");
-    const checkSpan = document.createElement("span");
-    checkSpan.classList.add("material-symbols-outlined");
-    checkSpan.innerText = todo.completed
-      ? "radio_button_checked"
-      : "radio_button_unchecked";
-    checkButton.appendChild(checkSpan);
-    checkButton.addEventListener("click", () => {
-      toggleComplete(index);
-    });
+    if (todo.completed) {
+      li.classList.add("completed");
+    }
 
-    // Create h4 tag for author
-    const h4 = document.createElement("h4");
-    h4.textContent = todo.author;
-    h4.classList.add("author-text");
-    li.appendChild(h4);
-
-    //Create span tag for timestamp
-    const span = document.createElement("span");
-    const dateString = todo.timestamp;
-    const date = new Date(dateString);
-    span.textContent = `${date.getDate()}/${
-      date.getMonth() + 1
-    }/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
-    span.classList.add("timestamp-text");
-    li.appendChild(span);
-
-    // Create p tag
-    const p = document.createElement("p");
-    p.textContent = todo.todo;
-    p.classList.add("todo-text");
-    p.style.textDecoration = todo.completed ? "line-through" : "none";
-    p.style.textTransform = "capitalize";
-    li.appendChild(p);
+    //Create div to contain move up/move down buttons
+    const orderDiv = document.createElement("div");
+    orderDiv.classList.add("order-div");
+    li.appendChild(orderDiv);
 
     // Create move up button
     if (index > 0) {
@@ -94,8 +66,11 @@ const renderTodos = () => {
       moveUpSpan.classList.add("material-symbols-outlined");
       moveUpSpan.textContent = "keyboard_arrow_up";
       moveUpButton.appendChild(moveUpSpan);
-      moveUpButton.addEventListener("click", () => moveTodoUp(index));
-      li.appendChild(moveUpButton);
+      moveUpButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        moveTodoUp(index);
+      });
+      orderDiv.appendChild(moveUpButton);
     }
 
     // Create move down button
@@ -107,9 +82,48 @@ const renderTodos = () => {
       moveDownSpan.classList.add("material-symbols-outlined");
       moveDownSpan.textContent = "keyboard_arrow_down";
       moveDownButton.appendChild(moveDownSpan);
-      moveDownButton.addEventListener("click", () => moveTodoDown(index));
-      li.appendChild(moveDownButton);
+      moveDownButton.addEventListener("click", (e) => {
+        moveTodoDown(index);
+        e.stopPropagation();
+      });
+      orderDiv.appendChild(moveDownButton);
     }
+
+    //Create div that contains timestamp and author text
+
+    const div = document.createElement("div");
+    div.classList.add("todo-item-text-container");
+    li.appendChild(div);
+
+    // Create h4 tag for author
+    const h4 = document.createElement("h4");
+    h4.textContent = todo.author;
+    h4.classList.add("author-text");
+
+    //Create span tag for timestamp
+    const span = document.createElement("span");
+    const dateString = todo.timestamp;
+    const date = new Date(dateString);
+    span.textContent = `${date.getDate()}/${
+      date.getMonth() + 1
+    }/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+    span.classList.add("timestamp-text");
+    div.appendChild(h4);
+    div.appendChild(span);
+
+    // Create p tag
+    const p = document.createElement("p");
+    p.textContent = todo.todo;
+    p.classList.add("todo-text");
+    p.style.textDecoration = todo.completed ? "line-through" : "none";
+    p.style.textTransform = "capitalize";
+    li.appendChild(p);
+
+
+    //Create div container for edit and delete button
+    const changeDiv = document.createElement('div')
+    changeDiv.classList.add('change-div')
+    li.appendChild(changeDiv)
 
     // Create edit button
     const editButton = document.createElement("button");
@@ -118,7 +132,8 @@ const renderTodos = () => {
     editSpan.classList.add("material-symbols-outlined");
     editSpan.textContent = "edit";
     editButton.appendChild(editSpan);
-    editButton.addEventListener("click", () => {
+    editButton.addEventListener("click", (e) => {
+      e.stopPropagation();
       editTodoItem(index, p);
     });
 
@@ -129,15 +144,20 @@ const renderTodos = () => {
     removeSpan.classList.add("material-symbols-outlined");
     removeSpan.textContent = "close";
     removeButton.appendChild(removeSpan);
-    removeButton.addEventListener("click", () => {
+    removeButton.addEventListener("click", (e) => {
+      e.stopPropagation();
       removeTodoItem(index);
     });
 
+    //Eventlistener on Li tag for toggling completed state
+    li.addEventListener("click", () => {
+      toggleComplete(index, li);
+    });
     // Append the buttons to the list item
-    li.appendChild(checkButton);
+
     li.appendChild(p);
-    li.appendChild(editButton);
-    li.appendChild(removeButton);
+    changeDiv.appendChild(editButton);
+    changeDiv.appendChild(removeButton);
 
     //Append the list item to the todo list
     todoList.appendChild(li);
@@ -184,10 +204,13 @@ const moveTodoDown = (index) => {
   renderTodos();
 };
 
-const toggleComplete = (index) => {
+const toggleComplete = (index, li) => {
+  // Toggle the completed state in the todos array
   todos[index].completed = !todos[index].completed;
+  // Save updated todos to localStorage
   localStorage.setItem("todos", JSON.stringify(todos));
-  renderTodos();
+  // Dynamically toggle the 'completed' class on the li
+  li.classList.toggle("completed", todos[index].completed);
 };
 
 const removeTodoItem = (index) => {

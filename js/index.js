@@ -41,13 +41,42 @@ const renderTodos = () => {
       : "radio_button_unchecked";
     checkButton.appendChild(checkSpan);
     checkButton.addEventListener("click", () => {
-      toggleComplete(index, li);
+      toggleComplete(index);
     });
 
     // Create p tag
     const p = document.createElement("p");
     p.textContent = todo.todo;
     p.classList.add("todo-text");
+    p.style.textDecoration = todo.completed ? "line-through" : "none";
+    p.style.textTransform = "capitalize";
+    li.appendChild(p);
+
+    // Create move up button
+    if (index > 0) {
+      // No move up button for the first item
+      const moveUpButton = document.createElement("button");
+      moveUpButton.classList.add("move-up-button");
+      const moveUpSpan = document.createElement("span");
+      moveUpSpan.classList.add("material-symbols-outlined");
+      moveUpSpan.textContent = "keyboard_arrow_up";
+      moveUpButton.appendChild(moveUpSpan);
+      moveUpButton.addEventListener("click", () => moveTodoUp(index));
+      li.appendChild(moveUpButton);
+    }
+
+    // Create move down button
+    if (index < todos.length - 1) {
+      //No move down button for the last item
+      const moveDownButton = document.createElement("button");
+      moveDownButton.classList.add("move-down-button");
+      const moveDownSpan = document.createElement("span");
+      moveDownSpan.classList.add("material-symbols-outlined");
+      moveDownSpan.textContent = "keyboard_arrow_down";
+      moveDownButton.appendChild(moveDownSpan);
+      moveDownButton.addEventListener("click", () => moveTodoDown(index));
+      li.appendChild(moveDownButton);
+    }
 
     // Create edit button
     const editButton = document.createElement("button");
@@ -57,7 +86,7 @@ const renderTodos = () => {
     editSpan.textContent = "edit";
     editButton.appendChild(editSpan);
     editButton.addEventListener("click", () => {
-      editTodoItem(index);
+      editTodoItem(index, p);
     });
 
     // Create delete button
@@ -79,6 +108,67 @@ const renderTodos = () => {
 
     //Append the list item to the todo list
     todoList.appendChild(li);
+  });
+};
+
+//Functions
+
+const moveTodoUp = (index) => {
+  //Swap the current item with the one above it
+  const temp = todos[index - 1];
+  todos[index - 1] = todos[index];
+  todos[index] = temp;
+
+  //Update local storage and re-render the todos
+  localStorage.setItem("todos", JSON.stringify(todos));
+  renderTodos();
+};
+
+const moveTodoDown = (index) => {
+  //Swap the current item with the one below it
+  const temp = todos[index + 1];
+  todos[index + 1] = todos[index];
+  todos[index] = temp;
+
+  //Update local storage and re-render the todos
+  localStorage.setItem("todos", JSON.stringify(todos));
+  renderTodos();
+};
+
+const toggleComplete = (index) => {
+  todos[index].completed = !todos[index].completed;
+  localStorage.setItem("todos", JSON.stringify(todos));
+  renderTodos();
+};
+
+const removeTodoItem = (index) => {
+  todos.splice(index, 1);
+  localStorage.setItem("todos", JSON.stringify(todos));
+  renderTodos();
+};
+
+const editTodoItem = (index, p) => {
+  const editInput = document.createElement("input");
+  p.replaceWith(editInput);
+  editInput.value = p.textContent;
+  editInput.focus();
+  const confirmButton = document.createElement("button");
+  confirmButton.classList.add("confirm-button");
+  const confirmSpan = document.createElement("span");
+  confirmSpan.classList.add("material-symbols-outlined");
+  confirmSpan.textContent = "check";
+  confirmButton.appendChild(confirmSpan);
+  editInput.insertAdjacentElement("afterend", confirmButton);
+  confirmButton.addEventListener("click", () => {
+    if (editInput.value.trim() === "") {
+      alert("Todo cannot be empty");
+      editInput.focus();
+    } else {
+      todos[index].todo = editInput.value;
+      localStorage.setItem("todos", JSON.stringify(todos));
+      confirmButton.remove();
+      renderTodos();
+    }
   });
 };
 

@@ -49,10 +49,16 @@ main {
 
 .todo-item {
   background-color: darkorange;
-  width: 60%;
+  width: 90%;
+  margin: auto;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+}
+
+button{
+    border: none;
+    background-color: transparent;
 }
 
 .completed{

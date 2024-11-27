@@ -2,10 +2,15 @@
 
 const todoForm = document.querySelector(".todo-form");
 const todoAlert = document.querySelector(".todo-alert");
+const todoSuccess = document.querySelector(".todo-success");
 const todoInput = document.querySelector(".todo-input");
 const todoList = document.querySelector(".todo-list");
+const authorInput = document.querySelector(".author-input");
+const filterContainer = document.querySelector(".filter-container");
 
 let todos = [];
+
+//Eventlisteners
 
 document.addEventListener("DOMContentLoaded", function () {
   const storedTodos = JSON.parse(localStorage.getItem("todos"));
@@ -23,6 +28,18 @@ document.addEventListener("DOMContentLoaded", function () {
 todoForm.addEventListener("submit", (e) => {
   e.preventDefault();
   createNewTodo();
+});
+
+filterContainer.addEventListener("click", (e) => {
+  //Check if the clicked target is a button
+  if (e.target.tagName === "BUTTON") {
+    //Determine the sort criteria based on the buttons text or class
+    if (e.target.textContent === "Sort by author") {
+      sortTodos("author");
+    } else if (e.target.textContent === "Sort by timestamp") {
+      sortTodos("timestamp");
+    }
+  }
 });
 
 const renderTodos = () => {
@@ -43,6 +60,22 @@ const renderTodos = () => {
     checkButton.addEventListener("click", () => {
       toggleComplete(index);
     });
+
+    // Create h4 tag for author
+    const h4 = document.createElement("h4");
+    h4.textContent = todo.author;
+    h4.classList.add("author-text");
+    li.appendChild(h4);
+
+    //Create span tag for timestamp
+    const span = document.createElement("span");
+    const dateString = todo.timestamp;
+    const date = new Date(dateString);
+    span.textContent = `${date.getDate()}/${
+      date.getMonth() + 1
+    }/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+    span.classList.add("timestamp-text");
+    li.appendChild(span);
 
     // Create p tag
     const p = document.createElement("p");
@@ -112,6 +145,22 @@ const renderTodos = () => {
 };
 
 //Functions
+
+const sortTodos = (criteria) => {
+  if (criteria === "timestamp") {
+    //Sort by timestamp (default)
+    todos.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  } else if (criteria === "author") {
+    todos.sort((a, b) => {
+      const authorA = a.author || "";
+      const authorB = b.author || "";
+      return authorA.localeCompare(authorB);
+    });
+  }
+
+  //After sorting, update the DOM
+  renderTodos();
+};
 
 const moveTodoUp = (index) => {
   //Swap the current item with the one above it
@@ -183,10 +232,22 @@ const createNewTodo = () => {
     }, 2000);
     return;
   }
+
+  if (authorInput.value === "") {
+    todoAlert.classList.add("show");
+    todoAlert.textContent = "Please enter a author";
+    authorInput.focus();
+    setTimeout(() => {
+      todoAlert.classList.remove("show");
+      todoAlert.textContent = "";
+    }, 2000);
+    return;
+  }
   const newTodo = {
     todo: todoInput.value.trim(),
     completed: false,
     timestamp: new Date().toISOString(),
+    author: authorInput.value.trim(),
   };
   todos.push(newTodo);
   localStorage.setItem("todos", JSON.stringify(todos));

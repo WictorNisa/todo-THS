@@ -21,28 +21,29 @@
     <main>
       <section class="todo-container">
         <div class="todo-header">
-          <h1>SwiftHawk</h1>
+          <h1>Todo List</h1>
         </div>
         <div class="todo-input-container">
           <form class="todo-form">
             <input type="text" class="todo-input" placeholder="Enter a todo" />
             <input type="text" class="author-input" placeholder="Author name" />
             <button type="submit" class="submit-todo-button">Add Todo</button>
-            <p class="todo-alert">alert</p>
-            <p class="todo-success">success</p>
           </form>
         </div>
-
+        <div class="alert-container">
+          <p class="todo-alert">alert</p>
+          <p class="todo-success">success</p>
+        </div>
         <ul class="todo-list"></ul>
         <div class="filter-container">
-          <button type="button" id="sortByAuthorBtn">Sort by author</button>
-          <button type="button" id="sortByTimestampBtn">
+          <button type="button" id="sortByAuthorBtn" class="sortByAuthor">Sort by author</button>
+          <button type="button" id="sortByTimestampBtn" class="sortByTimestamp">
             Sort by timestamp
           </button>
         </div>
       </section>
     </main>
-   
+
     <script src="js/index.js"></script>
   </body>
 </html>

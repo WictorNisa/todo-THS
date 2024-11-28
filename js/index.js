@@ -31,14 +31,11 @@ todoForm.addEventListener("submit", (e) => {
 });
 
 filterContainer.addEventListener("click", (e) => {
-  //Check if the clicked target is a button
-  if (e.target.tagName === "BUTTON") {
-    //Determine the sort criteria based on the buttons text or class
-    if (e.target.textContent === "Sort by author") {
-      sortTodos("author");
-    } else if (e.target.textContent === "Sort by timestamp") {
-      sortTodos("timestamp");
-    }
+  // Check if the clicked target is a button with a specific class
+  if (e.target.classList.contains("sortByAuthor")) {
+    sortTodos("author");
+  } else if (e.target.classList.contains("sortByTimestamp")) {
+    sortTodos("timestamp");
   }
 });
 
@@ -47,6 +44,7 @@ const renderTodos = () => {
   todos.forEach((todo, index) => {
     const li = document.createElement("li");
     li.classList.add("todo-item");
+    
 
     if (todo.completed) {
       li.classList.add("completed");
@@ -115,15 +113,19 @@ const renderTodos = () => {
     const p = document.createElement("p");
     p.textContent = todo.todo;
     p.classList.add("todo-text");
-    p.style.textDecoration = todo.completed ? "line-through" : "none";
     p.style.textTransform = "capitalize";
     li.appendChild(p);
 
+    //Eventlistener on Li tag for toggling completed state
+    li.addEventListener("click", () => {
+      toggleComplete(index, li);
+    });
+    // Append the buttons to the list item
 
     //Create div container for edit and delete button
-    const changeDiv = document.createElement('div')
-    changeDiv.classList.add('change-div')
-    li.appendChild(changeDiv)
+    const changeDiv = document.createElement("div");
+    changeDiv.classList.add("change-div");
+    li.appendChild(changeDiv);
 
     // Create edit button
     const editButton = document.createElement("button");
@@ -136,6 +138,7 @@ const renderTodos = () => {
       e.stopPropagation();
       editTodoItem(index, p);
     });
+    changeDiv.appendChild(editButton);
 
     // Create delete button
     const removeButton = document.createElement("button");
@@ -146,16 +149,8 @@ const renderTodos = () => {
     removeButton.appendChild(removeSpan);
     removeButton.addEventListener("click", (e) => {
       e.stopPropagation();
-      removeTodoItem(index);
+      removeTodoItem(index, li);
     });
-
-    //Eventlistener on Li tag for toggling completed state
-    li.addEventListener("click", () => {
-      toggleComplete(index, li);
-    });
-    // Append the buttons to the list item
-
-    li.appendChild(p);
     changeDiv.appendChild(editButton);
     changeDiv.appendChild(removeButton);
 
@@ -167,20 +162,17 @@ const renderTodos = () => {
 //Functions
 
 const sortTodos = (criteria) => {
+  console.log(`Sorting by ${criteria}`);
   if (criteria === "timestamp") {
-    //Sort by timestamp (default)
     todos.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   } else if (criteria === "author") {
-    todos.sort((a, b) => {
-      const authorA = a.author || "";
-      const authorB = b.author || "";
-      return authorA.localeCompare(authorB);
-    });
+    todos.sort((a, b) => (a.author || "").localeCompare(b.author || ""));
   }
-
-  //After sorting, update the DOM
+  console.log("After sorting:", todos);
+  localStorage.setItem("todos", JSON.stringify(todos));
   renderTodos();
 };
+
 
 const moveTodoUp = (index) => {
   //Swap the current item with the one above it
@@ -213,10 +205,16 @@ const toggleComplete = (index, li) => {
   li.classList.toggle("completed", todos[index].completed);
 };
 
-const removeTodoItem = (index) => {
-  todos.splice(index, 1);
-  localStorage.setItem("todos", JSON.stringify(todos));
-  renderTodos();
+const removeTodoItem = (index, li) => {
+  // Add the slide-out-left class to the list item
+  li.classList.add("slide-out-left");
+
+  // Wait for the animation to complete before removing the item
+  li.addEventListener("animationend", () => {
+    todos.splice(index, 1);
+    localStorage.setItem("todos", JSON.stringify(todos));
+    renderTodos();
+  });
 };
 
 const editTodoItem = (index, p) => {
@@ -247,10 +245,12 @@ const editTodoItem = (index, p) => {
 const createNewTodo = () => {
   if (todoInput.value === "") {
     todoAlert.classList.add("show");
+    todoAlert.classList.add("shake-horizontal");
     todoAlert.textContent = "Please enter your todo text";
     todoInput.focus();
     setTimeout(() => {
       todoAlert.classList.remove("show");
+      todoAlert.classList.remove("shake-horizontal");
       todoAlert.textContent = "";
     }, 2000);
     return;
@@ -274,14 +274,16 @@ const createNewTodo = () => {
   };
   todos.push(newTodo);
   localStorage.setItem("todos", JSON.stringify(todos));
-
   todoInput.value = "";
+  authorInput.value = "";
 
   renderTodos();
-  todoAlert.classList.add("show");
-  todoAlert.textContent = "Todo added successfully";
+  todoSuccess.classList.add("show");
+  todoSuccess.classList.add("text-focus-in");
+  todoSuccess.textContent = "Todo added successfully";
   setTimeout(() => {
-    todoAlert.classList.remove("show");
-    todoAlert.textContent = "";
+    todoSuccess.classList.remove("show");
+    todoSuccess.classList.remove("text-focus-in");
+    todoSuccess.textContent = "";
   }, 2000);
 };
